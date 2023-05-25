@@ -1,9 +1,12 @@
 * {
     margin: 0;
     padding: 0;
-    background-color: #555;
     font-family: Calibri;
     color: #fff;
+}
+
+html {
+    background-color: #555;
 }
 
 :root {
@@ -13,4 +16,24 @@
 .container {
     width: 100%;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.title {
+    font-size: 3rem;
+    font-weight: 900;
+    text-align: center;
+}
+
+.canvasWrapper {
+    width: 80%;
+    aspect-ratio: 16 / 9;
+    background-color: #444;
+    border: 3px solid black;
+}
+
+canvas {
+
 }
