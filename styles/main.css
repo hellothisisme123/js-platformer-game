@@ -29,11 +29,14 @@ html {
 
 .canvasWrapper {
     width: 80%;
+    max-height: 90vh;
     aspect-ratio: 16 / 9;
     background-color: #444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: 3px solid black;
 }
 
 canvas {
-
 }
