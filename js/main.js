@@ -56,20 +56,23 @@ game = {
         airDrag: 0.1, // constant force dragging the speed down while in the air
         walkingDrag: 0.5, // constant force dragging the speed down while grounded
         gravAcceleration: 0.5, // how fast gravity accelerates
-        direction: 1,
         grounded: false,
-
+        
         // landing bounce is when you land from a fall and hold jump while you land
         landBounceHeightMult: 0.2,
-        landBounceSpeedBoost: 2,
+        landBounceSpeedBoost: 1.1,
         landBounceMinSpeed: 20,
-
+        
         // jump
         jumpTick: 0,
         jumpDuration: 10, // in frames
         initialJumpYBoost: 3,
         initialJumpXBoost: 1.7,
-        jumpHoldYBoost: 1.1,
+        jumpHoldYBoost: 1.05,
+        
+        // dash
+        dashSpeed: 15,
+        direction: 1,
 
         controls: {
             leftBtn: [
@@ -81,8 +84,8 @@ game = {
                 'ArrowRight'
             ],
             upBtn: [
-                'w',
-                'ArrowUp'
+                'null',
+                'null'
             ],
             downBtn: [
                 's',
@@ -91,6 +94,10 @@ game = {
             jumpBtn: [
                 ' ',
                 'null'
+            ],
+            dashBtn: [
+                'w',
+                'i'
             ]
         },
         heldButtons: {
@@ -104,6 +111,11 @@ game = {
     blockSize: canvas.width / game.blocksWide,
     blocksWide: game.blocksWide,
     backgroundColor: '#87CEEB'
+}
+
+function dash() {
+    game.character.speedX += game.character.dashSpeed * game.character.direction
+    game.character.speedY += game.character.dashSpeed
 }
 
 function characterJump() {
@@ -189,6 +201,11 @@ function characterController() {
             game.character.speedX -= game.character.walkAcceleration
         }
     }
+
+    if (!game.character.heldButtons.left && !game.character.heldButtons.right) {
+        if (Math.abs(game.character.speedX) * 0.9 < 1) game.character.speedX = 0
+        game.character.speedX *= 0.9
+    }
 }
 
 function characterPositionCalculation() {
@@ -213,14 +230,16 @@ function drawFrame() {
 }
 
 window.addEventListener('keydown', e => {
-    // if (e.repeat) return
+    if (e.repeat) return
     
     if (e.key == game.character.controls.leftBtn[0] || e.key == game.character.controls.leftBtn[1]) {
         game.character.heldButtons.left = true
+        game.character.direction = -1
     } 
     
     if (e.key == game.character.controls.rightBtn[0] || e.key == game.character.controls.rightBtn[1]) {
         game.character.heldButtons.right = true
+        game.character.direction = 1
     } 
     
     if (e.key == game.character.controls.upBtn[0] || e.key == game.character.controls.upBtn[1]) {
@@ -233,6 +252,10 @@ window.addEventListener('keydown', e => {
 
     if (e.key == game.character.controls.jumpBtn[0] || e.key == game.character.controls.jumpBtn[1]) {
         game.character.heldButtons.jump = true
+    }
+
+    if (e.key == game.character.controls.dashBtn[0] || e.key == game.character.controls.dashBtn[1]) {
+        dash()
     }
 })
 
