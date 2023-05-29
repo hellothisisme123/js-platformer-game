@@ -7,8 +7,15 @@ function roundDownToMultiple(num, mult) {
 } 
 
 let game = {
-    blocksWide: 35
+    blocksWide: 30,
 }
+
+const levels = [
+    {
+        title: '1',
+        
+    }
+]
 
 startGame()
 function startGame() {
@@ -23,9 +30,9 @@ function startGame() {
         
         characterBorderCheck()
         characterPositionCalculation()
-    
-        console.clear()
-        console.log(game.character.speedX, game.character.speedY)
+        
+        // console.clear()
+        // console.log(game.character.speedX, game.character.speedY)
         drawFrame()
     }, 1 / 60);
 }
@@ -37,15 +44,19 @@ function checkCanvasSupport() {
 
 function setCanvasSize() {
     canvas.width = roundDownToMultiple(canvasWrapper.clientWidth, game.blocksWide)
-    canvas.height = roundDownToMultiple(canvasWrapper.clientHeight, game.blocksWide)
+    // sets block size
+    game.blockSize = canvas.width / game.blocksWide
+    canvas.height = roundDownToMultiple(canvasWrapper.clientHeight, game.blockSize)
 }
 
 game = {
     character: {
         x: 0,
         y: 0,
-        width: 1,
-        height: 1.5,
+        dx: undefined, // drawn x will be set after ever change in position // used for parallaxing backgrounds
+        dy: undefined, // drawn y will be set after ever change in position // used for parallaxing backgrounds
+        width: 1 * game.blockSize,
+        height: 1.5 * game.blockSize,
         color: '#8b0510',
         speedX: 0, // current speed
         speedY: 0, // current speed
@@ -108,7 +119,12 @@ game = {
             jump: false,
         }
     },
-    blockSize: canvas.width / game.blocksWide,
+    viewport: {
+        x: 0,
+        y: 0,
+        width: 30,
+    },
+    blockSize: game.blockSize,
     blocksWide: game.blocksWide,
     backgroundColor: '#87CEEB'
 }
@@ -120,8 +136,8 @@ function dash() {
 
 function characterJump() {
     if (game.character.heldButtons.jump && game.character.jumpTick < game.character.jumpDuration) {
-        console.log('red')
         if (game.character.jumpTick == 0) { // on the first jump frame the player gets a boost
+            if (!game.character.grounded) return
             game.character.grounded = false
             game.character.speedY -= game.character.initialJumpYBoost
             game.character.speedX *= game.character.initialJumpXBoost
@@ -135,7 +151,7 @@ function characterBorderCheck() {
     if (game.character.y + game.character.height > canvas.height) {
         // landing
         if (game.character.heldButtons.jump && game.character.speedY > game.character.landBounceMinSpeed) {
-            game.character.y = canvas.height - (game.character.height * game.blockSize)
+            game.character.y = canvas.height - (game.character.height)
             game.character.speedY = -game.character.speedY * game.character.landBounceHeightMult
             game.character.speedX *= game.character.landBounceSpeedBoost
             return
@@ -144,7 +160,7 @@ function characterBorderCheck() {
         game.character.speedY = 0
         game.character.grounded = true
         game.character.jumpTick = 0 // allows the player to jump again
-        game.character.y = canvas.height - (game.character.height * game.blockSize)
+        game.character.y = canvas.height - (game.character.height)
     }
 }
 
@@ -211,16 +227,29 @@ function characterController() {
 function characterPositionCalculation() {
     game.character.x += game.character.speedX
     game.character.y += game.character.speedY
+
+    game.character.dx = game.character.x - game.viewport.x
+    game.character.dy = game.character.y - game.viewport.y
 }
 
 function drawBackground() {
     ctx.fillStyle = game.backgroundColor
     ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    // draw background
+    for (let col = 0; col < game.blocksWide; col++) {
+        for (let row = 0; row < canvas.height / game.blockSize; row++) {
+            // draws in a grid
+            ctx.strokeStyle = 'rgb(0,0,0,0.2)'
+            ctx.lineWidth = '1'
+            ctx.strokeRect(col * game.blockSize, row * game.blockSize, game.blockSize, game.blockSize)
+        }
+    }
 }
 
 function drawCharacter() {
     ctx.fillStyle = game.character.color
-    ctx.fillRect(game.character.x, game.character.y, game.character.width * game.blockSize, game.character.height * game.blockSize)
+    ctx.fillRect(game.character.dx, game.character.dy, game.character.width, game.character.height)
 }
 
 function drawFrame() {
